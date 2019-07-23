@@ -21,6 +21,11 @@ func NewCommand(ctx context.Context) *cobra.Command {
 		Use:   "start",
 		Short: "start file copy",
 		RunE: func(cmd *cobra.Command, args []string) error {
+			source = viper.GetString("source")
+			target = viper.GetString("target")
+			debug = viper.GetBool("debug")
+			port = viper.GetString("port")
+
 			if debug {
 				logrus.SetLevel(logrus.DebugLevel)
 				logrus.SetReportCaller(true)
@@ -42,16 +47,18 @@ func NewCommand(ctx context.Context) *cobra.Command {
 		},
 	}
 	logrus.SetFormatter(&logrus.TextFormatter{})
+	viper.SetEnvPrefix("FILE")
+	viper.AutomaticEnv()
 	command.PersistentFlags().BoolVarP(&debug, "debug", "v", false, "debug mod")
 	command.PersistentFlags().StringVarP(&source, "source", "s", "/source", "source file dir")
 	command.PersistentFlags().StringVarP(&target, "target", "t", "/etc/docker/certs.d/", "target file dir")
 	command.PersistentFlags().StringVarP(&port, "port", "p", "8080", "web server port, example: 8080")
+	_ = command.MarkPersistentFlagRequired("source")
+	_ = command.MarkPersistentFlagRequired("target")
 	_ = viper.BindPFlag("debug", command.PersistentFlags().Lookup("debug"))
 	_ = viper.BindPFlag("source", command.PersistentFlags().Lookup("source"))
 	_ = viper.BindPFlag("target", command.PersistentFlags().Lookup("target"))
 	_ = viper.BindPFlag("port", command.PersistentFlags().Lookup("port"))
-	_ = command.MarkPersistentFlagRequired("source")
-	_ = command.MarkPersistentFlagRequired("target")
 
 	return command
 }
