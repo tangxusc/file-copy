@@ -5,7 +5,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-var EventBus = make(chan interface{}, 100)
+var EventBus = make(chan interface{}, 10)
 var subscribes = make([]chan interface{}, 0)
 
 func Listen(ctx context.Context) {

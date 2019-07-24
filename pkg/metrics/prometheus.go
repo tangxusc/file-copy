@@ -30,6 +30,7 @@ func init() {
 	})
 	prometheus.MustRegister(counter)
 	prometheus.MustRegister(current)
+	prometheus.MustRegister(prometheus.NewBuildInfoCollector())
 }
 
 func Start(ctx context.Context) {

@@ -5,6 +5,7 @@ import (
 	"github.com/rjeczalik/notify"
 	"github.com/sirupsen/logrus"
 	"github.com/tangxusc/file-copy/pkg/bus"
+	"github.com/tangxusc/file-copy/pkg/config"
 	"github.com/tangxusc/file-copy/pkg/metrics"
 	"io"
 	"io/ioutil"
@@ -17,9 +18,9 @@ var eventInfoChan = make(chan notify.EventInfo, 100)
 var targetDir string
 var sourceDir string
 
-func Start(ctx context.Context, source, target string) error {
-	targetDir = target
-	e, path := getSourceDirPath(source)
+func Start(ctx context.Context) error {
+	targetDir = config.Instance.Target
+	e, path := getSourceDirPath(config.Instance.Source)
 	if e != nil {
 		panic(e.Error())
 	}
@@ -30,7 +31,7 @@ func Start(ctx context.Context, source, target string) error {
 		return e
 	}
 	//监听文件
-	e = notify.Watch(source, eventInfoChan, notify.InMovedFrom, notify.InDelete, notify.InCreate, notify.InMovedTo)
+	e = notify.Watch(config.Instance.Source, eventInfoChan, notify.InMovedFrom, notify.InDelete, notify.InCreate, notify.InMovedTo)
 	if e != nil {
 		return e
 	}
@@ -70,7 +71,7 @@ func dispatchEvent(info notify.EventInfo) error {
 	switch info.Event() {
 	//新增
 	case notify.InCreate, notify.InMovedFrom:
-		e := check(join)
+		e := check()
 		if e != nil {
 			return e
 		}
@@ -141,7 +142,7 @@ func deleteFile(info string) error {
 	return e
 }
 
-func check(info string) error {
+func check() error {
 	//check target dir exist
 	e, b := checkTargetDirExist()
 	if e != nil {
