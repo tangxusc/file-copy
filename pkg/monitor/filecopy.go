@@ -31,7 +31,7 @@ func Start(ctx context.Context) error {
 		return e
 	}
 	//监听文件
-	e = notify.Watch(config.Instance.Source, eventInfoChan, notify.InMovedFrom, notify.InDelete, notify.InCreate, notify.InMovedTo)
+	e = notify.Watch(config.Instance.Source, eventInfoChan, notify.Remove, notify.Create)
 	if e != nil {
 		return e
 	}
@@ -70,7 +70,7 @@ func dispatchEvent(info notify.EventInfo) error {
 	join := filepath.Join(targetDir, fileName)
 	switch info.Event() {
 	//新增
-	case notify.InCreate, notify.InMovedFrom:
+	case notify.Create:
 		e := check()
 		if e != nil {
 			return e
@@ -81,7 +81,7 @@ func dispatchEvent(info notify.EventInfo) error {
 		}
 
 	//删除
-	case notify.InDelete, notify.InMovedTo:
+	case notify.Remove:
 		e := deleteFile(join)
 		if e != nil {
 			return e

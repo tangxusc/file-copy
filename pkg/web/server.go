@@ -10,6 +10,7 @@ import (
 	"log"
 	"net/http"
 	_ "net/http/pprof"
+	"os"
 	"path/filepath"
 )
 
@@ -57,7 +58,19 @@ func AddRoute(f func(*gin.Engine)) {
 func init() {
 	AddRoute(func(engine *gin.Engine) {
 		engine.GET("/", lsHandler)
+		engine.DELETE("/", deleteHandler)
 	})
+}
+
+func deleteHandler(ctx *gin.Context) {
+	sub := ctx.DefaultQuery("sub", "/")
+	filename := ctx.Query("filename")
+	e := os.Remove(filepath.Join(config.Instance.Source, sub, filename))
+	if e != nil {
+		ctx.Data(http.StatusInternalServerError, "", []byte(e.Error()))
+		return
+	}
+	ctx.JSON(http.StatusOK, true)
 }
 
 func lsHandler(ctx *gin.Context) {
